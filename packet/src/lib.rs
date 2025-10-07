@@ -23,15 +23,8 @@ use {
     serde_with::{serde_as, Bytes},
 };
 
-#[cfg(test)]
-static_assertions::const_assert_eq!(PACKET_DATA_SIZE, 5704);
-/// Maximum over-the-wire size of a Transaction
-///   1280 is IPv6 minimum MTU
-///   40 bytes is the size of the IPv6 header
-///   8 bytes is the size of the fragment header
-// pub const PACKET_DATA_SIZE: usize = 1280 - 40 - 8;
-// updating packet data size to accomodate ML_DSA
-pub const PACKET_DATA_SIZE: usize = 5704;
+// Include the generated packet size constant
+include!(concat!(env!("OUT_DIR"), "/packet_size.rs"));
 
 #[cfg(feature = "bincode")]
 pub trait Encode {
