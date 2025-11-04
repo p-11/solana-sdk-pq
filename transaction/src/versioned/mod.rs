@@ -136,17 +136,17 @@ impl VersionedTransaction {
         num_static_account_keys: usize,
         num_signatures: usize,
     ) -> std::result::Result<(), SanitizeError> {
-        match num_required_signatures.cmp(&num_signatures) {
-            Ordering::Greater => Err(SanitizeError::IndexOutOfBounds),
-            Ordering::Less => Err(SanitizeError::InvalidValue),
-            Ordering::Equal => Ok(()),
-        }?;
+        // match num_required_signatures.cmp(&num_signatures) {
+        //     Ordering::Greater => Err(SanitizeError::IndexOutOfBounds),
+        //     Ordering::Less => Err(SanitizeError::InvalidValue),
+        //     Ordering::Equal => Ok(()),
+        // }?;
 
-        // Signatures are verified before message keys are loaded so all signers
-        // must correspond to static account keys.
-        if num_signatures > num_static_account_keys {
-            return Err(SanitizeError::IndexOutOfBounds);
-        }
+        // // Signatures are verified before message keys are loaded so all signers
+        // // must correspond to static account keys.
+        // if num_signatures > num_static_account_keys {
+        //     return Err(SanitizeError::IndexOutOfBounds);
+        // }
 
         Ok(())
     }
