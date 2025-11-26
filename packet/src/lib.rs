@@ -23,6 +23,7 @@ use {
     serde_with::{serde_as, Bytes},
 };
 
+// P11CHANGE-PACKET-SIZE-INCREASE
 // Include the generated packet size constant
 include!(concat!(env!("OUT_DIR"), "/packet_size.rs"));
 

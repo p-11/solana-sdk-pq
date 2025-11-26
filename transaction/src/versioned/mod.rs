@@ -136,6 +136,7 @@ impl VersionedTransaction {
         num_static_account_keys: usize,
         num_signatures: usize,
     ) -> std::result::Result<(), SanitizeError> {
+        // P11CHANGE-ML-DSA-44-TRANSACTIONS
         // match num_required_signatures.cmp(&num_signatures) {
         //     Ordering::Greater => Err(SanitizeError::IndexOutOfBounds),
         //     Ordering::Less => Err(SanitizeError::InvalidValue),
