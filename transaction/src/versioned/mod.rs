@@ -136,18 +136,21 @@ impl VersionedTransaction {
         num_static_account_keys: usize,
         num_signatures: usize,
     ) -> std::result::Result<(), SanitizeError> {
-        // P11CHANGE-ML-DSA-44-TRANSACTIONS
-        // match num_required_signatures.cmp(&num_signatures) {
-        //     Ordering::Greater => Err(SanitizeError::IndexOutOfBounds),
-        //     Ordering::Less => Err(SanitizeError::InvalidValue),
-        //     Ordering::Equal => Ok(()),
-        // }?;
+        // SECURITY FIX: Enforce exact signature-count validation.
+        // This bound prevents an attacker from submitting a transaction with zero or missing
+        // signatures, which would otherwise pass validation when `zip` truncates the iterator
+        // and `all()` returns true on the empty result.
+        match num_required_signatures.cmp(&num_signatures) {
+            Ordering::Greater => Err(SanitizeError::IndexOutOfBounds),
+            Ordering::Less => Err(SanitizeError::InvalidValue),
+            Ordering::Equal => Ok(()),
+        }?;
 
-        // // Signatures are verified before message keys are loaded so all signers
-        // // must correspond to static account keys.
-        // if num_signatures > num_static_account_keys {
-        //     return Err(SanitizeError::IndexOutOfBounds);
-        // }
+        // SECURITY FIX: Enforce static-account-key upper bounds.
+        // Signatures are verified before message keys are loaded, so all signers must correspond to static account keys.
+        if num_signatures > num_static_account_keys {
+            return Err(SanitizeError::IndexOutOfBounds);
+        }
 
         Ok(())
     }
@@ -197,6 +200,13 @@ impl VersionedTransaction {
 
     #[cfg(feature = "verify")]
     fn _verify_with_results(&self, message_bytes: &[u8]) -> Vec<bool> {
+        // SECURITY FIX: Fail closed on sanitization errors.
+        // Returning `[false]` ensures that `all()` evaluates to false if signature constraints
+        // are violated, comprehensively preventing signature-count bypasses.
+        if self.sanitize_signatures().is_err() {
+            return vec![false];
+        }
+
         self.signatures
             .iter()
             .zip(self.message.static_account_keys().iter())
